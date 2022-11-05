@@ -1,0 +1,8 @@
+{
+  "nrf-connect.topdir": "/home/ingarsa/Programs/ncs",
+  "nrf-connect.toolchain.path": "PATH",
+  "nrf-connect.applications": [
+    "/home/ingarsa/Programs/myprojects/plz_work"
+  ],
+  "cmake.configureOnOpen": true
+}

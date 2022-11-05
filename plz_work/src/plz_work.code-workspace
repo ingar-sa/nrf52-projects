@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "plz_work",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"nrf-connect.applications": [
+			"${workspaceFolder}"
+		],
+		"nrf-connect.toolchain.path": "PATH",
+		"files.associations": {
+			"dk_buttons_and_leds.h": "c"
+		}
+	}
+}
