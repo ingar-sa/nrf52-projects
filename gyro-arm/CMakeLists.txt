@@ -11,6 +11,7 @@ target_sources(app PRIVATE src/main.c)
 
 target_sources(app PRIVATE
     src/custom_files/mpu_sensor.c
+    src/custom_files/motor_control.c
 )
 
 zephyr_library_include_directories(src/custom_files)

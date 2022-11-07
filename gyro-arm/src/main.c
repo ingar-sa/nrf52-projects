@@ -9,6 +9,7 @@
 #include <logging/log.h>
 #include <dk_buttons_and_leds.h>
 #include <mpu_sensor.h>
+#include <motor_control.h>
 
 
 #define LOG_MODULE_NAME app
@@ -17,41 +18,18 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 #define RUN_STATUS_LED DK_LED1
 #define RUN_LED_BLINK_INTERVAL 1000
 
-static void flash_led1(void);
-
 static void
-button1_pressed(uint32_t button_state, uint32_t has_changed) {
-	// printk("Button state: %i | State has changed: %i\n", button_state, has_changed);
-	/*
-	 * Button 1 has has_changed = 1;
-	 * Button 2 has has_changed = 2;
-	 * Button 3 has has_changed = 4;
-	 * Button 4 has has_changed = 8;
-	 */
-	// uint32_t button_pressed = has_changed; 
-
-	// switch (button_pressed)
-	// {
-	// case 4:
-	// 	button_pressed = 3;
-	// 	break;
-	// case 8:
-	// 	button_pressed = 4;
-	// 	break;
-	// default:
-	// 	// LOG_ERR("Invalid button (err: %d)", button1_pressed);
-	// 	break;
-	// }
-
-	// // button_state is zero before the button is pressed
-	// if (!button_state) {
-	// 	printk("Button %i pressed", button_pressed);
-	// }
-
-	uint32_t button_pressed = 0;
+button_pressed(uint32_t button_state, uint32_t has_changed) {
+	uint8_t button_pressed;
 	if (has_changed & button_state) {
 		switch (has_changed)
 		{
+		case DK_BTN1_MSK:
+			button_pressed = 1;
+			break;
+		case DK_BTN2_MSK:
+			button_pressed = 2;
+			break;
 		case DK_BTN3_MSK:
 			button_pressed = 3;
 			break;
@@ -59,12 +37,12 @@ button1_pressed(uint32_t button_state, uint32_t has_changed) {
 			button_pressed = 4;
 			break;
 		default:
-			// For button 1 has_changed = 1, and for button 2 it's 2
-			button_pressed = has_changed;
+			LOG_ERR("Invalid button (err: %d)", button_state);
 			break;
 		}
 
-		LOG_INF("Button %d pressed.", button_pressed);
+		set_motor_angle(button_pressed);
+		LOG_INF("Button %d pressed.");
 	}
 }
 
@@ -76,41 +54,45 @@ configure_dk_buttons_leds(void) {
 		LOG_ERR("Cannot init leds (err: %d)", err);
 	}
 
-	err = dk_buttons_init(button1_pressed);
+	err = dk_buttons_init(button_pressed);
 	if (err) {
 		LOG_ERR("Could not initialize buttons (err: %d)", err);
 	}
 }
 
-static void
-flash_led1(void) {
-
-	// int err;
-	bool on_or_off = false;
-	for (;;) {
-		// err = dk_set_led(RUN_STATUS_LED, on_or_off);
-		// if (err) {
-		// 	LOG_ERR("Could not toggleLED 1 (err: %d", err);
-		// }
-		// dk_set_led(RUN_STATUS_LED, (on_or_off++)%2);
-		 dk_set_led(RUN_STATUS_LED, on_or_off);
-		 k_sleep(K_MSEC(RUN_LED_BLINK_INTERVAL));
-		// LOG_INF("on_or_off is: %d", on_or_off);
-		
-		on_or_off = (on_or_off) ? false : true;
-	}
-}
-
-void main(void)
+int main(void)
 {	
 	printk("Hello World! %s\n", CONFIG_BOARD);
-	// printk("New version flashed\n");
+	printk("New version flashed\n");
+
+	struct accel_values accel_values;
+	struct gyro_values gyro_values;
+
 	configure_dk_buttons_leds();
-	int err = mpu_sensor_init();
+
+	int err = 0;
+	err = mpu_sensor_init();
 	if (err) {
 		LOG_ERR("Failed to initialize MPU sensor! (err: %d)", err);
 	}
 
-	flash_led1();
+	err = motor_init();
+	if (err) {
+		LOG_ERR("Failed to initialize motor. Error: %d", err);
+	}
+
+	int on_or_off = 1;
+	for (;;) {
+		// dk_set_led(RUN_STATUS_LED, (on_or_off++)%2);
+		if (read_accel_values(&accel_values) == 0) {
+			LOG_INF("# %d, Accel: X %06d, Y: %06d, Z: %06d", on_or_off, accel_values.x, accel_values.y, accel_values.z);
+		}
+		if (read_gyro_values(&gyro_values) == 0) {
+			LOG_INF("# %d, Gyro: X %06d, Y: %06d, Z: %06d", on_or_off, gyro_values.x, gyro_values.y, gyro_values.z);
+		}
+		k_sleep(K_MSEC(RUN_LED_BLINK_INTERVAL));
+	}
+	
+	return 0;
 }
 

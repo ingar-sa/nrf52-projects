@@ -34,7 +34,6 @@ typedef struct
 /* MPU driver gyro configuration structure. */
 typedef struct
 {
-
     uint8_t                 :3;
     uint8_t fs_sel          :2; // FS_SEL 2-bit unsigned value. Selects the full scale range of gyroscopes.
     uint8_t                 :3;
@@ -59,5 +58,20 @@ typedef struct
     accel_config_t      accel_config;       // Accelerometer configuration structure
 }app_mpu_config_t;
 
+struct accel_values {
+  int16_t x;
+  int16_t y;
+  int16_t z;
+};
+
+struct gyro_values {
+  int16_t x;
+  int16_t y;
+  int16_t z;
+};
+
 int mpu_sensor_init(void);
 
+int read_accel_values(struct accel_values* accel_values);
+
+int read_gyro_values(struct gyro_values* gyro_values);

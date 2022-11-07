@@ -1,7 +1,12 @@
 {
     "nrf-connect.applications": [
-        "${workspaceFolder}/gyro-arm"
+        "${workspaceFolder}\\gyro-arm"
     ],
     "nrf-connect.topdir": "${nrf-connect.sdk:2.1.1}",
-    "nrf-connect.toolchain.path": "PATH"
+    "nrf-connect.toolchain.path": "${nrf-connect.toolchain:2.1.1}",
+    "files.associations": {
+        "mpu_sensor.h": "c",
+        "nrfx_twim.h": "c",
+        "pwm.h": "c"
+    }
 }
